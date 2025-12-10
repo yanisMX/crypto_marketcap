@@ -1,20 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react"
-
-type Theme = "dark" | "light" | "system"
-
-type ThemeProviderProps = {
-  children: React.ReactNode
-  defaultTheme?: Theme
-  storageKey?: string
-}
-
-type ThemeProviderState = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-}
+import { Theme, ThemeProviderProps, ThemeProviderState } from "../../../shared/types"
+import { DEFAULT_THEME, THEME_STORAGE_KEY } from '../../../shared/constants'
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  theme: DEFAULT_THEME,
   setTheme: () => null,
 }
 
@@ -22,8 +11,8 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
                                 children,
-                                defaultTheme = "system",
-                                storageKey = "vite-ui-theme",
+                                defaultTheme = DEFAULT_THEME,
+                                storageKey = THEME_STORAGE_KEY,
                                 ...props
                               }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(

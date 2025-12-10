@@ -1,74 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
-
-// Define the structure of cryptocurrency data
-export interface CryptoData {
-  id: number
-  name: string
-  symbol: string
-  quote: {
-    USD: {
-      price: number
-      percent_change_24h: number
-      market_cap: number
-    }
-  }
-}
-
-// Define API response types
-export interface ListingsResponse {
-  data: CryptoData[]
-  status: {
-    timestamp: string
-    error_code: number
-    error_message: string | null
-    elapsed: number
-    credit_count: number
-  }
-}
-
-export interface QuotesResponse {
-  data: {
-    [symbol: string]: CryptoData
-  }
-  status: {
-    timestamp: string
-    error_code: number
-    error_message: string | null
-    elapsed: number
-    credit_count: number
-  }
-}
-
-export interface FearAndGreedIndexResponse {
-  data: {
-    value: number
-    value_classification: string
-    update_time: string
-  }
-  status: {
-    timestamp: string
-    error_code: number
-    error_message: string | null
-    elapsed: number
-    credit_count: number
-  }
-}
-
-// Define error response type
-export interface ErrorResponse {
-  error: string
-  originalError?: string
-}
+import { CryptoData, ListingsResponse, QuotesResponse, FearAndGreedIndexResponse, ErrorResponse, CryptoAPI } from '../shared/types'
 
 // Type guard to check if a response is an error
 function isErrorResponse(response: any): response is ErrorResponse {
   return response && typeof response === 'object' && 'error' in response
-}
-
-export type CryptoAPI = {
-  getListings: (limit?: number) => Promise<ListingsResponse>
-  getQuotes: (symbols: string[]) => Promise<QuotesResponse>
-  getFearGreedIndex: () => Promise<FearAndGreedIndexResponse>
 }
 
 const cryptoAPI: CryptoAPI = {

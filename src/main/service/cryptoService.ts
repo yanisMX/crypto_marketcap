@@ -1,13 +1,14 @@
 import axios, { AxiosError } from 'axios'
 import * as dotenv from 'dotenv'
 import path from 'path'
+import { CryptoData, ListingsResponse, QuotesResponse, FearAndGreedIndexResponse } from '../../shared/types'
+import { CMC_BASE_URL, CMC_FEAR_GREED_INDEX_URL } from '../../shared/constants'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 let CMC_API_KEY = String(process.env.MAIN_VITE_CMC_API_KEY || '').trim()
 
-const BASE_URL = 'https://pro-api.coinmarketcap.com/v1'
-const FEAR_GREED_INDEX_URL = 'https://pro-api.coinmarketcap.com/v3/fear-and-greed/latest'
+// Using constants from shared/constants.ts
 
 // Define error class for API-related errors
 export class CryptoServiceError extends Error {
@@ -20,57 +21,7 @@ export class CryptoServiceError extends Error {
   }
 }
 
-export interface CryptoData {
-  id: number
-  name: string
-  symbol: string
-  quote: {
-    USD: {
-      price: number
-      percent_change_24h: number
-      market_cap: number
-    }
-  }
-}
-
-export interface ListingsResponse {
-  data: CryptoData[]
-  status: {
-    timestamp: string
-    error_code: number
-    error_message: string | null
-    elapsed: number
-    credit_count: number
-  }
-}
-
-export interface QuotesResponse {
-  data: {
-    [symbol: string]: CryptoData
-  }
-  status: {
-    timestamp: string
-    error_code: number
-    error_message: string | null
-    elapsed: number
-    credit_count: number
-  }
-}
-
-export interface FearAndGreedIndexResponse {
-  data: {
-    value: number
-    value_classification: string
-    update_time: string
-  }
-  status: {
-    timestamp: string
-    error_code: number
-    error_message: string | null
-    elapsed: number
-    credit_count: number
-  }
-}
+// Using types from shared/types.ts
 
 export class CryptoService {
   private getHeaders(): Record<string, string> {
@@ -98,7 +49,7 @@ export class CryptoService {
       const headers = this.getHeaders()
 
       const response = await axios.get<ListingsResponse>(
-        `${BASE_URL}/cryptocurrency/listings/latest`,
+        `${CMC_BASE_URL}/cryptocurrency/listings/latest`,
         {
           headers,
           params: {
@@ -136,7 +87,7 @@ export class CryptoService {
       }
       const headers = this.getHeaders()
 
-      const response = await axios.get<any>(FEAR_GREED_INDEX_URL, {
+      const response = await axios.get<any>(CMC_FEAR_GREED_INDEX_URL, {
         headers
       })
       return response.data
@@ -175,7 +126,7 @@ export class CryptoService {
 
       const headers = this.getHeaders()
 
-      const response = await axios.get<QuotesResponse>(`${BASE_URL}/cryptocurrency/quotes/latest`, {
+      const response = await axios.get<QuotesResponse>(`${CMC_BASE_URL}/cryptocurrency/quotes/latest`, {
         headers,
         params: {
           symbol: symbols.join(','),
