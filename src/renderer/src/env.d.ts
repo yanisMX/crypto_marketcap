@@ -35,6 +35,21 @@ export interface QuotesResponse {
   }
 }
 
+export interface FearAndGreedIndexResponse {
+  data: {
+    value: number
+    value_classification: string
+    update_time: string
+  }
+  status: {
+    timestamp: string
+    error_code: number
+    error_message: string | null
+    elapsed: number
+    credit_count: number
+  }
+}
+
 export interface ErrorResponse {
   error: string
   originalError?: string
@@ -45,6 +60,7 @@ declare global {
     cryptoAPI: {
       getListings: (limit?: number) => Promise<ListingsResponse>
       getQuotes: (symbols: string[]) => Promise<QuotesResponse>
+      getFearGreedIndex: () => Promise<FearAndGreedIndexResponse>
     }
   }
 }

@@ -1,6 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
-import { CryptoService, CryptoServiceError, ListingsResponse, QuotesResponse } from './service/cryptoService'
+import {
+  CryptoService,
+  CryptoServiceError,
+  ListingsResponse,
+  QuotesResponse,
+  FearAndGreedIndexResponse
+} from './service/cryptoService'
 
 const cryptoService = new CryptoService()
 let mainWindow: BrowserWindow | null = null
@@ -47,21 +53,44 @@ function handleServiceError(error: unknown): { error: string; originalError?: st
 }
 
 // Gestionnaires IPC
-ipcMain.handle('crypto:getListings', async (event, limit?: number): Promise<ListingsResponse | { error: string; originalError?: string }> => {
-  try {
-    return await cryptoService.getLatestListings(limit)
-  } catch (error) {
-    return handleServiceError(error)
+ipcMain.handle(
+  'crypto:getListings',
+  async (
+    event,
+    limit?: number
+  ): Promise<ListingsResponse | { error: string; originalError?: string }> => {
+    try {
+      return await cryptoService.getLatestListings(limit)
+    } catch (error) {
+      return handleServiceError(error)
+    }
   }
-})
+)
 
-ipcMain.handle('crypto:getQuotes', async (event, symbols: string[]): Promise<QuotesResponse | { error: string; originalError?: string }> => {
-  try {
-    return await cryptoService.getCryptoQuote(symbols)
-  } catch (error) {
-    return handleServiceError(error)
+ipcMain.handle(
+  'crypto:getQuotes',
+  async (
+    event,
+    symbols: string[]
+  ): Promise<QuotesResponse | { error: string; originalError?: string }> => {
+    try {
+      return await cryptoService.getCryptoQuote(symbols)
+    } catch (error) {
+      return handleServiceError(error)
+    }
   }
-})
+)
+
+ipcMain.handle(
+  'crypto:getFearGreedIndex',
+  async (event): Promise<FearAndGreedIndexResponse | { error: string; originalError?: string }> => {
+    try {
+      return await cryptoService.getFearAndGreedIndex()
+    } catch (error) {
+      return handleServiceError(error)
+    }
+  }
+)
 
 // Événements de cycle de vie de l'application
 app.whenReady().then(() => {

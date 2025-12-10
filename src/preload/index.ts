@@ -39,6 +39,21 @@ export interface QuotesResponse {
   }
 }
 
+export interface FearAndGreedIndexResponse {
+  data: {
+    value: number
+    value_classification: string
+    update_time: string
+  }
+  status: {
+    timestamp: string
+    error_code: number
+    error_message: string | null
+    elapsed: number
+    credit_count: number
+  }
+}
+
 // Define error response type
 export interface ErrorResponse {
   error: string
@@ -53,6 +68,7 @@ function isErrorResponse(response: any): response is ErrorResponse {
 export type CryptoAPI = {
   getListings: (limit?: number) => Promise<ListingsResponse>
   getQuotes: (symbols: string[]) => Promise<QuotesResponse>
+  getFearGreedIndex: () => Promise<FearAndGreedIndexResponse>
 }
 
 const cryptoAPI: CryptoAPI = {
@@ -69,6 +85,13 @@ const cryptoAPI: CryptoAPI = {
       throw new Error(`Failed to get quotes: ${response.error}`)
     }
     return response as QuotesResponse
+  },
+  getFearGreedIndex: async () => {
+    const response = await ipcRenderer.invoke('crypto:getFearGreedIndex')
+    if (isErrorResponse(response)) {
+      throw new Error(`Failed to get Fear and Greed Index: ${response.error}`)
+    }
+    return response as FearAndGreedIndexResponse
   }
 }
 
