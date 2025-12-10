@@ -1,88 +1,150 @@
-import axios from 'axios';
-import * as dotenv from 'dotenv';
-import path from 'path';
+import axios, { AxiosError } from 'axios'
+import * as dotenv from 'dotenv'
+import path from 'path'
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 let CMC_API_KEY = String(process.env.MAIN_VITE_CMC_API_KEY || '').trim()
 
-const BASE_URL = 'https://pro-api.coinmarketcap.com/v1';
+const BASE_URL = 'https://pro-api.coinmarketcap.com/v1'
+
+// Define error class for API-related errors
+export class CryptoServiceError extends Error {
+  constructor(message: string, public originalError?: Error) {
+    super(message)
+    this.name = 'CryptoServiceError'
+  }
+}
+
+// Define response types
+export interface CryptoData {
+  id: number
+  name: string
+  symbol: string
+  quote: {
+    USD: {
+      price: number
+      percent_change_24h: number
+      market_cap: number
+    }
+  }
+}
+
+export interface ListingsResponse {
+  data: CryptoData[]
+  status: {
+    timestamp: string
+    error_code: number
+    error_message: string | null
+    elapsed: number
+    credit_count: number
+  }
+}
+
+export interface QuotesResponse {
+  data: {
+    [symbol: string]: CryptoData
+  }
+  status: {
+    timestamp: string
+    error_code: number
+    error_message: string | null
+    elapsed: number
+    credit_count: number
+  }
+}
 
 export class CryptoService {
-  private getHeaders() {
+  private getHeaders(): Record<string, string> {
     const headers = {
       'X-CMC_PRO_API_KEY': CMC_API_KEY,
-      'Accept': 'application/json'
-    };
-
-    // Additional check to ensure API key is in headers
-    if (!headers['X-CMC_PRO_API_KEY']) {
-      console.error('API Key is missing from headers');
-      headers['X-CMC_PRO_API_KEY'] = CMC_API_KEY;
+      Accept: 'application/json'
     }
 
-    return headers;
+    if (!headers['X-CMC_PRO_API_KEY']) {
+      console.error('API Key is missing from headers')
+      headers['X-CMC_PRO_API_KEY'] = CMC_API_KEY
+    }
+
+    return headers
   }
 
-  async getLatestListings(limit: number = 100) {
+  async getLatestListings(limit: number = 100): Promise<ListingsResponse> {
     try {
       if (!CMC_API_KEY) {
-        throw new Error('API Key is missing or empty. Cannot make request to CoinMarketCap API.');
+        throw new CryptoServiceError('API Key is missing or empty. Cannot make request to CoinMarketCap API.')
       }
 
-      const headers = this.getHeaders();
+      const headers = this.getHeaders()
 
-      console.log('Request Headers:', JSON.stringify(headers));
-      console.log('X-CMC_PRO_API_KEY value:', headers['X-CMC_PRO_API_KEY']);
-
-      const response = await axios.get(`${BASE_URL}/cryptocurrency/listings/latest`, {
+      const response = await axios.get<ListingsResponse>(`${BASE_URL}/cryptocurrency/listings/latest`, {
         headers,
         params: {
           start: 1,
           limit,
           convert: 'USD'
         }
-      });
-      return response.data;
+      })
+      return response.data
     } catch (error) {
-      console.error('Erreur API CoinMarketCap:', error);
+      console.error('Erreur API CoinMarketCap:', error)
+
       if (axios.isAxiosError(error)) {
-        console.error('Request details:', error.config);
-        console.error('Response details:', error.response?.data);
+        const axiosError = error as AxiosError
+        console.error('Request details:', axiosError.config)
+        console.error('Response details:', axiosError.response?.data)
+
+        throw new CryptoServiceError(
+          `API request failed: ${axiosError.message}`,
+          axiosError
+        )
       }
-      throw error;
+
+      throw new CryptoServiceError(
+        'Failed to fetch cryptocurrency listings',
+        error instanceof Error ? error : undefined
+      )
     }
   }
 
-  async getCryptoQuote(symbols: string[]) {
+  async getCryptoQuote(symbols: string[]): Promise<QuotesResponse> {
     try {
-      // Ensure API key is not empty before making the request
-      if (!CMC_API_KEY) {
-        throw new Error('API Key is missing or empty. Cannot make request to CoinMarketCap API.');
+      if (!symbols || symbols.length === 0) {
+        throw new CryptoServiceError('No symbols provided for quote request')
       }
 
-      // Get headers using the common method
-      const headers = this.getHeaders();
+      if (!CMC_API_KEY) {
+        throw new CryptoServiceError('API Key is missing or empty. Cannot make request to CoinMarketCap API.')
+      }
 
-      // Log headers for debugging
-      console.log('Request Headers for quotes:', JSON.stringify(headers));
-      console.log('X-CMC_PRO_API_KEY value for quotes:', headers['X-CMC_PRO_API_KEY']);
+      const headers = this.getHeaders()
 
-      const response = await axios.get(`${BASE_URL}/cryptocurrency/quotes/latest`, {
+      const response = await axios.get<QuotesResponse>(`${BASE_URL}/cryptocurrency/quotes/latest`, {
         headers,
         params: {
           symbol: symbols.join(','),
           convert: 'USD'
         }
-      });
-      return response.data;
+      })
+      return response.data
     } catch (error) {
-      console.error('Erreur récupération quote:', error);
+      console.error('Erreur récupération quote:', error)
+
       if (axios.isAxiosError(error)) {
-        console.error('Request details:', error.config);
-        console.error('Response details:', error.response?.data);
+        const axiosError = error as AxiosError
+        console.error('Request details:', axiosError.config)
+        console.error('Response details:', axiosError.response?.data)
+
+        throw new CryptoServiceError(
+          `Quote request failed: ${axiosError.message}`,
+          axiosError
+        )
       }
-      throw error;
+
+      throw new CryptoServiceError(
+        'Failed to fetch cryptocurrency quotes',
+        error instanceof Error ? error : undefined
+      )
     }
   }
 }

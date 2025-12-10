@@ -23,10 +23,10 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@renderer': resolve('src/renderer/src'),
-          '@': resolve('src/renderer/src')  // ← Ajout pour Shadcn UI
+          '@': resolve('src/renderer/src') // ← Ajout pour Shadcn UI
         }
       },
-      plugins: [react()],
+      plugins: [react()]
     }
   }
 })
