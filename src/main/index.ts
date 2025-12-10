@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import { CryptoService } from './Service';
+import { CryptoService } from './service/cryptoService';
 
 const cryptoService = new CryptoService();
 let mainWindow: BrowserWindow | null = null;

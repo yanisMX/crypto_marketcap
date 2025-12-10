@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CryptoData } from '../src/env';
+import './index.css'
+import { Button } from "@/components/ui/button"
 
 function App() {
   const [cryptos, setCryptos] = useState<CryptoData[]>([]);
@@ -18,7 +20,6 @@ function App() {
     };
 
     fetchCryptos();
-    // Rafraîchir toutes les 60 secondes
     const interval = setInterval(fetchCryptos, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -28,6 +29,7 @@ function App() {
   return (
     <div className="dashboard">
       <h1>Dashboard Crypto</h1>
+      <Button variant="ghost">test</Button>
       <table>
         <thead>
         <tr>
