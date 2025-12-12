@@ -1,0 +1,100 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { StarOff } from 'lucide-react'
+import { Crypto } from '@/shared/types'
+
+interface WatchlistProps {
+  cryptos: Crypto[]
+  watchlist: string[]
+  removeFromWatchlist: (symbol: string) => void
+}
+
+export function Watchlist({ cryptos, watchlist, removeFromWatchlist }: WatchlistProps) {
+  if (watchlist.length === 0) {
+    return null
+  }
+
+  return (
+    <Card className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 mb-8">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-slate-900 dark:text-white">Watchlist</CardTitle>
+          <CardDescription className="text-slate-600 dark:text-slate-500">
+            Vos cryptomonnaies favorites
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow className="border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800/50">
+              <TableHead className="text-slate-600 dark:text-slate-400">Nom</TableHead>
+              <TableHead className="text-slate-600 dark:text-slate-400">Symbole</TableHead>
+              <TableHead className="text-slate-600 dark:text-slate-400 text-right">Prix (USD)</TableHead>
+              <TableHead className="text-slate-600 dark:text-slate-400 text-right">Variation 24h</TableHead>
+              <TableHead className="text-slate-600 dark:text-slate-400 text-right">Market Cap</TableHead>
+              <TableHead className="text-slate-600 dark:text-slate-400 text-center">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {cryptos
+              .filter((crypto) => watchlist.includes(crypto.symbol))
+              .map((crypto) => (
+                <TableRow
+                  key={`watchlist-${crypto.id}`}
+                  className="border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800/50 transition-colors"
+                >
+                  <TableCell className="font-medium text-slate-900 dark:text-white">{crypto.name}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className="bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-gray-300 dark:border-slate-700"
+                    >
+                      {crypto.symbol}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right text-slate-900 dark:text-white font-mono">
+                    $
+                    {crypto.quote.USD.price.toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge
+                      variant={
+                        crypto.quote.USD.percent_change_24h >= 0 ? 'default' : 'destructive'
+                      }
+                      className={
+                        crypto.quote.USD.percent_change_24h >= 0
+                          ? 'bg-green-500/20 text-green-400 border-green-500/50'
+                          : 'bg-red-500/20 text-red-400 border-red-500/50'
+                      }
+                    >
+                      {crypto.quote.USD.percent_change_24h >= 0 ? '+' : ''}
+                      {crypto.quote.USD.percent_change_24h.toFixed(2)}%
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right text-slate-700 dark:text-slate-300 font-mono">
+                    ${(crypto.quote.USD.market_cap / 1e9).toFixed(2)}B
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeFromWatchlist(crypto.symbol)}
+                      className="h-8 w-8 text-red-400"
+                    >
+                      <StarOff className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
