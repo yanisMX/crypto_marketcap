@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { StarOff } from 'lucide-react'
 import { Crypto } from '@/shared/types'
+import { SymbolBadge, PriceValue, ChangeBadge, MarketCapValue } from '@/components/crypto/CryptoCells'
 
 interface WatchlistProps {
   cryptos: Crypto[]
@@ -48,37 +48,16 @@ export function Watchlist({ cryptos, watchlist, removeFromWatchlist }: Watchlist
                 >
                   <TableCell className="font-medium text-slate-900 dark:text-white">{crypto.name}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className="bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-gray-300 dark:border-slate-700"
-                    >
-                      {crypto.symbol}
-                    </Badge>
+                    <SymbolBadge symbol={crypto.symbol} />
                   </TableCell>
                   <TableCell className="text-right text-slate-900 dark:text-white font-mono">
-                    $
-                    {crypto.quote.USD.price.toLocaleString('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
+                    <PriceValue price={crypto.quote.USD.price} />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge
-                      variant={
-                        crypto.quote.USD.percent_change_24h >= 0 ? 'default' : 'destructive'
-                      }
-                      className={
-                        crypto.quote.USD.percent_change_24h >= 0
-                          ? 'bg-green-500/20 text-green-400 border-green-500/50'
-                          : 'bg-red-500/20 text-red-400 border-red-500/50'
-                      }
-                    >
-                      {crypto.quote.USD.percent_change_24h >= 0 ? '+' : ''}
-                      {crypto.quote.USD.percent_change_24h.toFixed(2)}%
-                    </Badge>
+                    <ChangeBadge change={crypto.quote.USD.percent_change_24h} />
                   </TableCell>
                   <TableCell className="text-right text-slate-700 dark:text-slate-300 font-mono">
-                    ${(crypto.quote.USD.market_cap / 1e9).toFixed(2)}B
+                    <MarketCapValue marketCapUsd={crypto.quote.USD.market_cap} />
                   </TableCell>
                   <TableCell className="text-center">
                     <Button
